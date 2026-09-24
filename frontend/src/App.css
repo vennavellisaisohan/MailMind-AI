@@ -1,0 +1,144 @@
+﻿#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  background: #f4f7fb;
+  color: #172033;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.card {
+  width: 100%;
+  max-width: 560px;
+  padding: 40px;
+  border: 1px solid #e1e7f0;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgba(35, 55, 90, 0.10);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.brand-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  border-radius: 18px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: #4f46e5;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(28px, 5vw, 40px);
+  line-height: 1.15;
+}
+
+.description {
+  margin: 18px 0 28px;
+  color: #667085;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.status {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  border: 1px solid;
+  border-radius: 14px;
+  text-align: left;
+}
+
+.status.success {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.status.error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status strong {
+  display: block;
+  font-size: 15px;
+}
+
+.status p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+button {
+  width: 100%;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 12px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  background: #4338ca;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.footer-text {
+  margin: 24px 0 0;
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 28px 20px;
+  }
+}
