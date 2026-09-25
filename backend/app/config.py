@@ -15,3 +15,4 @@ GOOGLE_REDIRECT_URI = os.getenv(
 )
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./mailmind.db")
+TOKEN_ENCRYPTION_KEY = os.getenv("TOKEN_ENCRYPTION_KEY")
