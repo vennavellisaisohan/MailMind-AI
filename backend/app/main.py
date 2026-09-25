@@ -1,10 +1,12 @@
 
 import logging
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import auth
+from app.database import get_db
+from app.oauth_service import save_google_credentials
 
 
 app = FastAPI(
@@ -63,7 +65,10 @@ def google_login():
 
 
 @app.get("/auth/google/callback")
-def google_callback(request: Request):
+def google_callback(
+    request: Request,
+    db=Depends(get_db),
+):
     code = request.query_params.get("code")
     state = request.query_params.get("state")
     error = request.query_params.get("error")
@@ -105,12 +110,31 @@ def google_callback(request: Request):
 
         credentials = flow.credentials
 
+        # Save the user and encrypted OAuth credentials.
+        user = save_google_credentials(
+            db=db,
+            credentials=credentials,
+        )
+
         return {
             "status": "success",
             "message": "Google account connected successfully.",
+            "user_id": user.id,
+            "email": user.email,
+            "name": user.name,
             "scopes": credentials.scopes,
             "has_refresh_token": bool(credentials.refresh_token),
         }
+
+    except ValueError as error:
+        logging.exception(
+            "Google identity verification or credential validation failed"
+        )
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        ) from error
 
     except Exception as error:
         logging.exception("Google OAuth callback failed")
