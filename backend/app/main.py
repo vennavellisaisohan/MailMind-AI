@@ -1,10 +1,17 @@
-﻿from fastapi import FastAPI
+
+import logging
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+
+from app import auth
+
 
 app = FastAPI(
     title="MailMind AI API",
-    version="0.1.0"
+    version="0.1.0",
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,9 +25,100 @@ app.add_middleware(
 )
 
 
+# Temporary OAuth state storage for local development.
+# Replace with secure session/database storage before production.
+pending_oauth_states: dict[str, str] = {}
+
+
 @app.get("/health")
 def health_check():
     return {
         "status": "healthy",
-        "service": "MailMind AI API"
+        "service": "MailMind AI API",
     }
+
+
+@app.get("/auth/google/login")
+def google_login():
+    try:
+        authorization_url, state, code_verifier = (
+            auth.get_google_authorization_url()
+        )
+
+        # Store the PKCE code verifier against the OAuth state.
+        pending_oauth_states[state] = code_verifier
+
+        return {
+            "authorization_url": authorization_url,
+            "state": state,
+        }
+
+    except Exception as error:
+        logging.exception("Google login URL creation failed")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to create Google authorization URL.",
+        ) from error
+
+
+@app.get("/auth/google/callback")
+def google_callback(request: Request):
+    code = request.query_params.get("code")
+    state = request.query_params.get("state")
+    error = request.query_params.get("error")
+
+    # Handle an authorization error returned by Google.
+    if error:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Google authorization failed: {error}",
+        )
+
+    # Validate required callback parameters.
+    if not code or not state:
+        raise HTTPException(
+            status_code=400,
+            detail="Missing authorization code or state.",
+        )
+
+    # Validate the OAuth state.
+    if state not in pending_oauth_states:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired OAuth state.",
+        )
+
+    # Retrieve and remove the code verifier.
+    code_verifier = pending_oauth_states.pop(state)
+
+    try:
+        flow = auth.create_google_oauth_flow()
+
+        # Restore the PKCE verifier created during login.
+        flow.code_verifier = code_verifier
+
+        # Exchange the authorization code for Google credentials.
+        flow.fetch_token(
+            authorization_response=str(request.url),
+        )
+
+        credentials = flow.credentials
+
+        return {
+            "status": "success",
+            "message": "Google account connected successfully.",
+            "scopes": credentials.scopes,
+            "has_refresh_token": bool(credentials.refresh_token),
+        }
+
+    except Exception as error:
+        logging.exception("Google OAuth callback failed")
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Unable to complete Google OAuth callback. "
+                "Check backend logs."
+            ),
+        ) from error
