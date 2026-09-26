@@ -5,6 +5,8 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import auth
+from app.analysis_service import analyze_user_emails
+from app.schemas import EmailAnalysisRequest, EmailAnalysisResponse
 from app.database import get_db
 from app.oauth_service import save_google_credentials
 
@@ -145,4 +147,39 @@ def google_callback(
                 "Unable to complete Google OAuth callback. "
                 "Check backend logs."
             ),
+        ) from error
+
+
+@app.post(
+    "/emails/analyze",
+    response_model=EmailAnalysisResponse,
+)
+def analyze_emails(
+    request_data: EmailAnalysisRequest,
+    db=Depends(get_db),
+):
+    try:
+        results = analyze_user_emails(
+            db=db,
+            user_id=request_data.user_id,
+            max_results=request_data.max_results,
+            query=request_data.query,
+        )
+
+        return {
+            "results": results,
+        }
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        ) from error
+
+    except Exception as error:
+        logging.exception("Email analysis failed")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to analyze emails.",
         ) from error

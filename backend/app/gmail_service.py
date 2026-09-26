@@ -3,7 +3,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from sqlalchemy.orm import Session
 
-from app.config import GOOGLE_CLIENT_ID
+from app.config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 from app.models import OAuthToken
 from app.token_security import decrypt_token, encrypt_token
 
@@ -38,6 +38,7 @@ def get_gmail_service(
         refresh_token=refresh_token,
         token_uri="https://oauth2.googleapis.com/token",
         client_id=GOOGLE_CLIENT_ID,
+        client_secret=GOOGLE_CLIENT_SECRET,
         scopes=[
             "https://www.googleapis.com/auth/gmail.readonly",
         ],
