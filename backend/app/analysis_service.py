@@ -15,12 +15,25 @@ Sender: {email.get("sender", "")}
 Date: {email.get("date", "")}
 Snippet: {email.get("snippet", "")}
 
-Provide:
-1. A concise summary.
-2. Actionable tasks, if any.
-3. Explicit deadlines, if mentioned.
+Return ONLY valid JSON using exactly this structure:
 
-Do not invent information that is not present in the email.
+{{
+  "category": "Academic",
+  "priority": "High",
+  "summary": "Brief summary of the email.",
+  "tasks": [],
+  "deadline": null
+}}
+
+Rules:
+- category must be one of: Academic, Internship, Job, Placement, Examination, Event, Personal, Finance, Promotional, Other.
+- priority must be High, Medium, or Low.
+- summary must be concise and factual.
+- tasks must be a JSON array of actionable tasks.
+- deadline must contain an explicitly mentioned deadline or null.
+- Do not invent information.
+- Do not return Markdown.
+- Do not add any text outside the JSON object.
 """
 
 

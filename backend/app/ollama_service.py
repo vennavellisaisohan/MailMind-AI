@@ -1,13 +1,13 @@
-﻿import requests
+﻿import json
+
+import requests
 
 
 MODEL_NAME = "mailmind-ai"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 
-def analyze_email(
-    email_content: str,
-) -> str:
+def analyze_email(email_content: str) -> dict:
     """Analyze an email using the local MailMind AI model."""
 
     response = requests.post(
@@ -22,4 +22,11 @@ def analyze_email(
 
     response.raise_for_status()
 
-    return response.json()["response"]
+    raw_response = response.json()["response"].strip()
+
+    try:
+        return json.loads(raw_response)
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            "MailMind AI returned invalid JSON."
+        ) from error

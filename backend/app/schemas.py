@@ -7,12 +7,20 @@ class EmailAnalysisRequest(BaseModel):
     query: str | None = None
 
 
+class EmailAIAnalysis(BaseModel):
+    category: str
+    priority: str
+    summary: str
+    tasks: list[str]
+    deadline: str | None = None
+
+
 class EmailAnalysisResult(BaseModel):
     email_id: str | None = None
     subject: str
     sender: str
     date: str
-    analysis: str
+    analysis: EmailAIAnalysis
 
 
 class EmailAnalysisResponse(BaseModel):
